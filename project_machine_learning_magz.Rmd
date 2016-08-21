@@ -1,0 +1,104 @@
+---
+title: "Project Machine Learning"
+author: "Marco Guado"
+date: "August 21, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Final Project
+  
+###1. Introduction  
+This project will carry out an analysis of a collection of data to determine the best exercise routine performed with weights, the data set includes 5 measures recorded by sensors placed; waist, forearm and arm several people. It has been categorized from "A" to "D" to score the best measure.
+Where A is best and D is the worst routine. The data set consists of 160 variables whose values belong to six participants.  
+  
+###2. Objective  
+It is to be determined based on the values collected, what is the best exercise routine with weights, using a classification algorithm.  
+  
+###3. Data to be used  
+Download the data set.
+
+```{r}
+url_data_training <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv";
+url_data_testing <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv";
+
+df_training <- read.csv(url(url_data_training));
+df_testing <- read.csv(url(url_data_testing));
+
+tmp_df_training <- df_training[, c(8:160)];
+tmp_df_testing <- df_testing[, c(8:160)];
+
+length(df_training)
+nrow(df_training)
+length(df_testing)
+nrow(df_testing)
+
+
+```
+  
+###4. Analysis of data  
+We have two sets of data; First the "formation" and the second "test" in this data set there are columns whose value = NA, which will filter since they are not useful for analysis.
+  
+```{r}
+#Clean data
+not.na <- function(){
+	pos_columns <- c()
+	for(column in c(1:153)){
+		exist.na <- sum(is.na(tmp_df_testing[,column]))
+		if(20 == exist.na ){
+			#print("exist")
+		}else{
+			#print("not exist")
+			pos_columns <- c(pos_columns, column)
+		}		
+	}
+	return(pos_columns)
+}
+
+columns <- not.na();
+
+#We create two new data set that will be used for analysis
+new_df_training <- tmp_df_training[, columns];
+new_df_testing <- tmp_df_testing[, columns];
+```
+  
+After analyzing the data, we note that we have 52 predictor variables and a discriminant variable called "classe".
+  
+Classification models that contain both quantitative and qualitative variables can be solved using the following algorithms:  
+• Random Forest  
+• Neural Networks  
+• Bagging  
+• Classification Trees  
+  
+For this project we will use "Random Forest" based on what was observed in the data set:  
+- We have many variables  
+- We can determine which variables are most important  
+- We want to get good accuracy  
+  
+We process the data:
+```{r}
+library(randomForest);
+
+df_model<-randomForest(classe ~ ., data=new_df_training, ntree=30, mtry=6, replace=T);
+
+print(df_model)
+plot(df_model)
+legend("top", colnames(df_model$err.rate),col=1:4,cex=0.8,fill=1:4)
+
+varImpPlot(df_model)
+```
+
+We can see that the df_model has an error = 0.64%  
+an acceptable value for a prediction.  
+  
+```{r}
+predict(df_model, new_df_testing)
+
+```
+  
+###5. Conclusions  
+When using random forest algorithm we can see that the error rate is very low with which we can trust the results and that our model can be useful for other predictions.
+
