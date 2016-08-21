@@ -1,4 +1,4 @@
-# machine_learning  
+# Machine learning  
  
 Final Project Coursera, August - 2016   
 To display in the browser:
